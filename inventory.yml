@@ -1,0 +1,23 @@
+dev:
+  hosts:
+    dev.vagrant.local:
+      ansible_user: vagrant
+      ansible_ssh_private_key_file: .vagrant/machines/dev/virtualbox/private_key
+appservers:
+  hosts:
+    app.vagrant.local:
+      ansible_user: vagrant
+      ansible_ssh_private_key_file: .vagrant/machines/app/virtualbox/private_key
+    app2.vagrant.local:
+      ansible_user: vagrant
+      ansible_ssh_private_key_file: .vagrant/machines/app2/virtualbox/private_key
+dbservers:
+  hosts:
+    db.vagrant.local:
+      ansible_user: vagrant
+      ansible_ssh_private_key_file: .vagrant/machines/db/virtualbox/private_key
+mailservers:
+  hosts:
+    mx.vagrant.local:
+      ansible_user: vagrant
+      ansible_ssh_private_key_file: .vagrant/machines/mail/virtualbox/private_key
