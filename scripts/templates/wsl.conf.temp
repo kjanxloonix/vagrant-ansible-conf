@@ -1,0 +1,5 @@
+[automount]
+enabled = true
+root = /mnt/
+options = "metadata"
+mountFsTab = true

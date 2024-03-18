@@ -1,16 +1,11 @@
 @echo off
 
 rem Add a file to WSL environment
-(
-echo [automount]
-echo enabled = true
-echo root = /
-echo options = "metadata"
-echo mountFsTab = true
-) | wsl.exe -u root tee /etc/wsl.conf > nul
+wsl.exe pwd
+wsl.exe -u root cp "./templates/wsl.conf.temp" "/etc/wsl.conf"
 
-rem Shutdown WSL environment
-wsl.exe --shutdown
+rem Terminate WSL environment
+wsl.exe --terminate %1
 
 echo Added wsl.conf options.
 pause
