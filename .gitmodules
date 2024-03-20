@@ -1,3 +1,6 @@
-[submodule "roles/ansible-role-postgresql"]
-	path = roles/postgresql
-	url = https://github.com/geerlingguy/ansible-role-postgresql.git
+[submodule "playbooks/roles/postgresql"]
+	path = playbooks/roles/postgresql
+	url = https://github.com/geerlingguy/ansible-role-postgresql
+[submodule "playbooks/roles/postfix"]
+	path = playbooks/roles/postfix
+	url = https://github.com/geerlingguy/ansible-role-postfix.git
