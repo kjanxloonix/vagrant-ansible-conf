@@ -4,3 +4,9 @@
 [submodule "playbooks/roles/postfix"]
 	path = playbooks/roles/postfix
 	url = https://github.com/geerlingguy/ansible-role-postfix.git
+[submodule "playbooks/roles/jenkins"]
+	path = playbooks/roles/jenkins
+	url = https://github.com/geerlingguy/ansible-role-jenkins.git
+[submodule "playbooks/roles/tomcat"]
+	path = playbooks/roles/tomcat
+	url = https://github.com/robertdebock/ansible-role-tomcat.git
