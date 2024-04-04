@@ -1,0 +1,7 @@
+---
+- name: Test tasks
+  hosts: dev
+  gather_facts: true
+  become: false
+  roles:
+    - vagrant-cis-hardening
