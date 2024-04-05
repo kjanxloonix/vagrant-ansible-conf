@@ -80,21 +80,21 @@
     group: root
     state: directory
 
-- name: 5.1.8 | Ensure cron is restricted to authorized users
+- name: 5.1.8 | MAIN | Ensure cron is restricted to authorized users
   tags:
     - lvl1-server
     - lvl1-workstation
     - rule_5.1.8
   block:
-    - name: Remove cron.deny
+    - name: 5.1.8 | REMEDIATION | Remove cron.deny
       ansible.builtin.file:
         path: /etc/cron.deny
         state: absent
-    - name: Check if cron.allow exists
+    - name: 5.1.8 | AUDIT | Check if cron.allow exists
       ansible.builtin.stat:
         path: /etc/cron.allow
       register: cron_allow_state
-    - name: Create cron.allow
+    - name: 5.1.8 | REMEDIATION |Create cron.allow
       ansible.builtin.file:
         path: /etc/cron.allow
         mode: 0640
@@ -102,21 +102,21 @@
         group: root
         state: '{{ "file" if cron_allow_state.stat.exists else "touch" }}'
 
-- name: 5.1.9 | Ensure at is restricted to authorized users
+- name: 5.1.9 | MAIN | Ensure at is restricted to authorized users
   tags:
     - lvl1-server
     - lvl1-workstation
     - rule_5.1.9
   block:
-    - name: Remove at.deny
+    - name: 5.1.9 | REMEDIATION | Remove at.deny
       ansible.builtin.file:
         path: /etc/at.deny
         state: absent
-    - name: Check if at.allow exists
+    - name: 5.1.9 | AUDIT | Check if at.allow exists
       ansible.builtin.stat:
         path: /etc/at.allow
       register: at_allow_state
-    - name: Create cron.allow
+    - name: 5.1.9 | REMEDIATION | Create cron.allow
       ansible.builtin.file:
         path: /etc/at.allow
         mode: 0640

@@ -1,0 +1,276 @@
+---
+- name: 5.2.1 | Ensure permissions on /etc/ssh/sshd_config are configured
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.1
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config
+    mode: 0600
+    owner: root
+    group: root
+
+
+- name: 5.2.2 | MAIN | Ensure permissions on SSH private host key files are configured
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.2
+  block:
+    - name: 5.2.2 | AUDIT | Find SSH private keys
+      ansible.builtin.find:
+        paths: /etc/ssh
+        patterns: "ssh_host_*_key"
+        recurse: true
+      register: ssh_private_keys
+    - name: 5.2.2 | REMEDIATION | Set permissions on SSH private keys
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        mode: 0600
+        owner: root
+        group: root
+      loop: "{{ ssh_private_keys.files }}"
+      loop_control:
+        label: "{{ item.path }}"
+
+
+- name: 5.2.3 | MAIN | Ensure permissions on SSH public host key files are configured
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.3
+  block:
+    - name: 5.2.3 | AUDIT | Find SSH public keys
+      ansible.builtin.find:
+        paths: /etc/ssh
+        patterns: "ssh_host_*_key.pub"
+        recurse: true
+      register: ssh_public_keys
+    - name: 5.2.3 | REMEDIATION | Set permissions on SSH public keys
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        mode: 0644
+        owner: root
+        group: root
+      loop: "{{ ssh_public_keys.files }}"
+      loop_control:
+        label: "{{ item.path }}"
+
+- name: 5.2.4 | MAIN | Ensure SSH access is limited
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.4
+  block:
+    - name: 5.2.4 | REMEDIATION | Set SSH AllowUsers
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^#\\s*AllowUsers.*|^AllowUsers.*"
+        line: "AllowUsers {{ sshd_vars.allowusers }}"
+    - name: 5.2.4 | REMEDIATION | Set SSH AllowGroups
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^#\\s*AllowGroups.*|^AllowGroups.*"
+        line: "AllowGroups {{ sshd_vars.allowgroups }}"
+    - name: 5.2.4 | REMEDIATION | Set SSH DenyUsers
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^#\\s*DenyUsers.*|^DenyUsers.*"
+        line: "DenyUsers {{ sshd_vars.denyusers }}"
+    - name: 5.2.4 | REMEDIATION | Set SSH DenyGroups
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^#\\s*DenyGroups.*|^DenyGroups.*"
+        line: "DenyGroups {{ sshd_vars.denygroups }}"
+
+- name: 5.2.5 | Ensure SSH LogLevel is appropriate
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.5
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#\\s*LogLevel.*|^LogLevel.*"
+    line: "LogLevel {{ sshd_vars.loglevel }}"
+
+- name: 5.2.6 | Ensure SSH PAM is enabled
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.6
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#\\s*UsePAM.*|^UsePAM.*"
+    line: "UsePAM {{ sshd_vars.usepam }}"
+
+- name: 5.2.7 | Ensure SSH root login is disabled
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.7
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#\\s*PermitRootLogin.*|^PermitRootLogin.*"
+    line: "PermitRootLogin {{ sshd_vars.permitrootlogin }}"
+
+- name: 5.2.8 | Ensure SSH HostbasedAuthentication is disabled
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.8
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#\\s*HostbasedAuthentication.*|^HostbasedAuthentication.*"
+    line: "HostbasedAuthentication {{ sshd_vars.hostbasedauthentication }}"
+
+- name: 5.2.9 | Ensure SSH PermitEmptyPasswords is disabled
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.9
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#\\s*PermitEmptyPasswords.*|^PermitEmptyPasswords.*"
+    line: "PermitEmptyPasswords {{ sshd_vars.permitemptypasswords }}"
+
+- name: 5.2.10 | Ensure SSH PermitUserEnvironment is disabled
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.10
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#\\s*PermitUserEnvironment.*|^PermitUserEnvironment.*"
+    line: "PermitUserEnvironment {{ sshd_vars.permituserenvironment }}"
+
+- name: 5.2.11 | Ensure SSH IgnoreRhosts is enabled
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.11
+  ansible.builtin.replace:
+    path: /etc/ssh/sshd_config
+    regexp: "^#\\s*IgnoreRhosts.*|^IgnoreRhosts.*"
+    replace: "IgnoreRhosts {{ sshd_vars.ignorerhosts }}"
+
+- name: 5.2.12 | Ensure SSH X11 forwarding is disabled
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.12
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#\\s*X11Forwarding.*|^X11Forwarding.*"
+    line: "X11Forwarding {{ sshd_vars.x11forwarding }}"
+
+- name: 5.2.13 | Ensure only strong Ciphers are used
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.13
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#\\s*Ciphers.*|^Ciphers.*"
+    line: "Ciphers {{ sshd_vars.ciphers }}"
+
+- name: 5.2.14 | Ensure only strong MAC algorithms are used
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.14
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#\\s*MACs.*|^MACs.*"
+    line: "MACs {{ sshd_vars.macs }}"
+
+- name: 5.2.15 | Ensure only strong Key Exchange algorithms are used
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.15
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#\\s*KexAlgorithms.*|^KexAlgorithms.*"
+    line: "KexAlgorithms {{ sshd_vars.kexalgorithms }}"
+
+- name: 5.2.16 | Ensure SSH AllowTcpForwarding is disabled
+  tags:
+    - lvl2-server
+    - lvl2-workstation
+    - rule_5.2.16
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#\\s*AllowTcpForwarding.*|^AllowTcpForwarding.*"
+    line: "AllowTcpForwarding {{ sshd_vars.allowtcpforwarding }}"
+
+- name: 5.2.17 | Ensure SSH warning banner is configured
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.17
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#\\s*Banner.*|^Banner.*"
+    line: "Banner {{ sshd_vars.banner_path }}"
+
+- name: 5.2.18 | Ensure SSH MaxAuthTries is set to 4 or less
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.18
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#\\s*MaxAuthTries.*|^MaxAuthTries.*"
+    line: "MaxAuthTries {{ sshd_vars.maxauthtries }}"
+
+- name: 5.2.19 | Ensure SSH MaxStartups is configured
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.19
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#\\s*MaxStartups.*|^MaxStartups.*"
+    line: "MaxStartups {{ sshd_vars.maxstartups }}"
+
+- name: 5.2.20 | Ensure SSH MaxSessions is set to 10 or less
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.20
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#\\s*MaxSessions.*|^MaxSessions.*"
+    line: "MaxSessions {{ sshd_vars.maxsessions }}"
+
+- name: 5.2.21 | Ensure SSH LoginGraceTime is set to one minute or less
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.21
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#\\s*LoginGraceTime.*|^LoginGraceTime.*"
+    line: "LoginGraceTime {{ sshd_vars.logingracetime }}"
+
+- name: 5.2.22 | MAIN | Ensure SSH Idle Timeout Interval is configured
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.2.22
+  block:
+    - name: 5.2.22 | REMEDIATION | Configure SSH ClientAliveInterval
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^#\\s*ClientAliveInterval.*|^ClientAliveInterval.*"
+        line: "ClientAliveInterval {{ sshd_vars.clientaliveinterval }}"
+    - name: 5.2.22 | REMEDIATION | Configure SSH ClientAliveCountMax
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^#\\s*ClientAliveCountMax.*|^ClientAliveCountMax.*"
+        line: "ClientAliveCountMax {{ sshd_vars.clientalivecountmax }}"
+
+- name: Reload SSH Server
+  ansible.builtin.systemd_service:
+    name: sshd
+    state: reloaded
