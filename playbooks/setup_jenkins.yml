@@ -1,0 +1,9 @@
+---
+- name: Install jenkins on Second App VM
+  hosts: app2.vagrant.local
+  gather_facts: true
+  become: true
+  vars:
+    jenkins_hostname: app2.vagrant.local
+  roles:
+    - jenkins

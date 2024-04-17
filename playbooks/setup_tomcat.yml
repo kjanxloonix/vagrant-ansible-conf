@@ -1,0 +1,7 @@
+---
+- name: Install tomcat on First App VM
+  hosts: app.vagrant.local
+  gather_facts: true
+  become: true
+  roles:
+    - tomcat

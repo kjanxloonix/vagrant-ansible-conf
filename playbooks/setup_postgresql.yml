@@ -1,0 +1,7 @@
+---
+- name: Install postgresql on Database VM
+  hosts: db.vagrant.local
+  gather_facts: true
+  become: true
+  roles:
+    - postgresql
