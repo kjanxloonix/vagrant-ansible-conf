@@ -12,32 +12,34 @@ Vagrant.configure("2") do |config|
   config.hostmanager.include_offline = true
 
   # First application VM
-  config.vm.define "app" do |app|
-    app.vm.box_check_update = false
-    app.vm.box = "debian/bullseye64"
-    app.vm.hostname = "app"
-    app.hostmanager.aliases = %w(app.vagrant.local)
-    app.vm.network :private_network, ip: IP_APP_MAIN, netmask: "255.255.255.0"
-    app.vm.synced_folder ".", "/vagrant", disabled: true
-    app.vm.provider "virtualbox" do |vb|
-      vb.name = "First App VM"
+  config.vm.define "tomcat" do |tomcat|
+    tomcat.vm.box_check_update = false
+    tomcat.vm.box = "debian/bullseye64"
+    tomcat.vm.hostname = "tomcat"
+    tomcat.hostmanager.aliases = %w(tomcat.vagrant.local)
+    tomcat.vm.network :private_network, ip: IP_APP_MAIN, netmask: "255.255.255.0"
+    tomcat.vm.network "forwarded_port", guest: 8080, host: 8080
+    tomcat.vm.synced_folder ".", "/vagrant", disabled: true
+    tomcat.vm.provider "virtualbox" do |vb|
+      vb.name = "Tomcat VM"
     end
   end
 
   # Second application VM
-  config.vm.define "app2" do |app2|
-    app2.vm.box_check_update = false
-    app2.vm.box = "debian/bullseye64"
-    app2.vm.hostname = "app2"
-    app2.hostmanager.aliases = %w(app2.vagrant.local)
-    app2.vm.network :private_network, ip: IP_APP_SEC, netmask: "255.255.255.0"
-    app2.vm.synced_folder ".", "/vagrant", disabled: true
-    app2.vm.provider "virtualbox" do |vb|
-      vb.name = "Second App VM"
+  config.vm.define "jenkins" do |jenkins|
+    jenkins.vm.box_check_update = false
+    jenkins.vm.box = "debian/bullseye64"
+    jenkins.vm.hostname = "jenkins"
+    jenkins.hostmanager.aliases = %w(jenkins.vagrant.local)
+    jenkins.vm.network :private_network, ip: IP_APP_SEC, netmask: "255.255.255.0"
+    jenkins.vm.network "forwarded_port", guest: 8080, host: 8081
+    jenkins.vm.synced_folder ".", "/vagrant", disabled: true
+    jenkins.vm.provider "virtualbox" do |vb|
+      vb.name = "Jenkins VM"
     end
   end
 
-  # Developer VM (Ansible Management Node)
+  # Developer VM
   config.vm.define "dev", primary: true do |dev|
     dev.vm.box = "debian/bullseye64"
     dev.vm.hostname = "dev"
@@ -76,6 +78,7 @@ Vagrant.configure("2") do |config|
     mail.vm.hostname = "mx"
     mail.hostmanager.aliases = %w(mx.vagrant.local)
     mail.vm.network :private_network, ip: IP_MAIL, netmask: "255.255.255.0"
+    mail.vm.network "forwarded_port", guest: 25, host: 25
     mail.vm.synced_folder ".", "/vagrant", disabled: true
     mail.vm.provider "virtualbox" do |vb|
       vb.name = "Mail server VM"
@@ -84,6 +87,7 @@ Vagrant.configure("2") do |config|
 
   # Provider configuration
   config.vm.provider "virtualbox" do |vb|
+    vb.linked_clone = true
     vb.gui = false
     vb.memory = "4096"
     vb.cpus = 2
