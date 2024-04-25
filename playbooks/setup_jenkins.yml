@@ -1,9 +1,15 @@
 ---
 - name: Install jenkins on Second App VM
-  hosts: app2.vagrant.local
+  hosts: jenkins.vagrant.local
   gather_facts: true
   become: true
   vars:
-    jenkins_hostname: app2.vagrant.local
+    jenkins_hostname: jenkins.vagrant.local
+  pre_tasks:
+    - name: Update and upgrade apt packages
+      apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400
   roles:
     - jenkins
