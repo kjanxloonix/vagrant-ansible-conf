@@ -1,7 +1,24 @@
 ---
 # defaults file for vagrant-cis-hardening
 
+# Templates variables
+temp_vars:
+  uid_min: 1000
+
+# Section 4 variables
+journald_vars:
+  compress: "yes"
+  storage: "persistent"
+rsyslog_vars:
+  file_create_mode: "0640"
+
 # Section 5 variables
+auditd_vars:
+  max_log_file: 12
+  max_log_file_action: "keep_logs"
+  space_left_action: email
+  action_mail_acct: root
+  admin_space_left_action: single
 sshd_vars:
   allowusers: vagrant
   allowgroups: vagrant
