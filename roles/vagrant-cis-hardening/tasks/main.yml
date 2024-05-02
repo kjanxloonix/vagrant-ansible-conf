@@ -1,2 +1,9 @@
 ---
-- include_tasks: sec05/main.yml
+- name: 4 | Logging and Auditing
+  include_tasks: sec04/main.yml
+
+- name: 5 | Access, Authentication and Authorization
+  include_tasks: sec05/main.yml
+
+- name: 6 | System Maintenance
+  include_tasks: sec06/main.yml
