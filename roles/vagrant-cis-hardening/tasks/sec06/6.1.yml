@@ -1,0 +1,147 @@
+---
+- name: 6.1.1 | Ensure permissions on /etc/passwd are configured
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_6.1.1
+  ansible.builtin.file:
+    path: /etc/passwd
+    mode: 0644
+    owner: root
+    group: root
+
+- name: 6.1.2 | Ensure permissions on /etc/passwd- are configured
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_6.1.2
+  ansible.builtin.file:
+    path: /etc/passwd-
+    mode: 0644
+    owner: root
+    group: root
+
+- name: 6.1.3 | Ensure permissions on /etc/group are configured
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_6.1.3
+  ansible.builtin.file:
+    path: /etc/group
+    mode: 0644
+    owner: root
+    group: root
+
+- name: 6.1.4 | Ensure permissions on /etc/group- are configured
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_6.1.4
+  ansible.builtin.file:
+    path: /etc/group-
+    mode: 0644
+    owner: root
+    group: root
+
+- name: 6.1.5 | Ensure permissions on /etc/shadow are configured
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_6.1.5
+  ansible.builtin.file:
+    path: /etc/shadow
+    mode: 0640
+    owner: root
+    group: root
+
+- name: 6.1.6 | Ensure permissions on /etc/shadow- are configured
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_6.1.6
+  ansible.builtin.file:
+    path: /etc/shadow-
+    mode: 0640
+    owner: root
+    group: root
+
+- name: 6.1.7 | Ensure permissions on /etc/gshadow are configured
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_6.1.7
+  ansible.builtin.file:
+    path: /etc/gshadow
+    mode: 0640
+    owner: root
+    group: root
+
+- name: 6.1.8 | Ensure permissions on /etc/gshadow- are configured
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_6.1.8
+  ansible.builtin.file:
+    path: /etc/gshadow-
+    mode: 0640
+    owner: root
+    group: root
+
+- name: 6.1.9 | MAIN | Ensure no world writable files exist
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_6.1.9
+  block:
+    - name: 6.1.9 | AUDIT | Get world writable files
+      ansible.builtin.shell:
+        cmd: "df --local -P | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -type f -perm -0002"
+      register: world_writable_files
+      failed_when: false
+      changed_when: false
+    - name: 6.1.9 | REMEDIATION | Adjust world writable files' permissions
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        mode: o-w
+      with_items: "{{ world_writable_files.stdout_lines }}"
+
+- name: 6.1.10 | MAIN | Ensure no unowned files or directories exist
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_6.1.10
+  block:
+    - name: 6.1.10 | AUDIT | Get unowned files or directories
+      ansible.builtin.shell:
+        cmd: "df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -nouser"
+      register: orphaned_units
+      failed_when: false
+      changed_when: false
+    - name: 6.1.10 | REMEDIATION | Assign unowned files and directories to vagrant user
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        owner: vagrant
+        group: vagrant
+      with_items: "{{ orphaned_units.stdout_lines }}"
+
+- name: 6.1.11 | MAIN | Ensure no ungrouped files or directories exist
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_6.1.11
+  block:
+    - name: 6.1.11 | AUDIT | Get ungrouped files or directories
+      ansible.builtin.shell:
+        cmd: "df --local -P | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -nogroup"
+      register: ungrouped_units
+      failed_when: false
+      changed_when: false
+    - name: 6.1.11 | REMEDIATION | Assign unowned files and directories to vagrant user
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        owner: vagrant
+        group: vagrant
+      with_items: "{{ ungrouped_units.stdout_lines }}"
+
+# 6.1.12 Manual, omit
+# 6.1.13 Manual, omit
