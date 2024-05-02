@@ -26,3 +26,20 @@ sshd_vars:
   logingracetime: 60
   clientaliveinterval: 15
   clientalivecountmax: 3
+sudoers_vars:
+  logfilepath: "/var/log/sudo.log"
+  timestamptimeout: 15
+pam_vars:
+  minlen: 12
+  minclass: 4
+  deny: 4
+  fail_interval: 900
+  unlock_time: 600
+  encrypt_method: yescrypt
+  login_defs_umask: "027"
+  login_defs_usergroup_enab: "no"
+accenv_vars:
+  passmindays: 1
+  passmaxdays: 365
+  passwarnage: 7
+  inactive: 30
