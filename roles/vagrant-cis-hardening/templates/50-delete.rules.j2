@@ -1,0 +1,2 @@
+-a always,exit -F arch=b64 -S rename,unlink,unlinkat,renameat -F auid>={{ temp_vars.uid_min }} -F auid!=-1 -F key=delete
+-a always,exit -F arch=b32 -S unlink,rename,unlinkat,renameat -F auid>={{ temp_vars.uid_min }} -F auid!=-1 -F key=delete

@@ -1,0 +1,4 @@
+-a always,exit -F arch=b64 -S open,truncate,ftruncate,creat,openat -F exit=-EACCES -F auid>={{ temp_vars.uid_min }} -F auid!=-1 -F key=access
+-a always,exit -F arch=b64 -S open,truncate,ftruncate,creat,openat -F exit=-EPERM -F auid>={{ temp_vars.uid_min }} -F auid!=-1 -F key=access
+-a always,exit -F arch=b32 -S open,truncate,ftruncate,creat,openat -F exit=-EACCES -F auid>={{ temp_vars.uid_min }} -F auid!=-1 -F key=access
+-a always,exit -F arch=b32 -S open,truncate,ftruncate,creat,openat -F exit=-EPERM -F auid>={{ temp_vars.uid_min }} -F auid!=-1 -F key=access

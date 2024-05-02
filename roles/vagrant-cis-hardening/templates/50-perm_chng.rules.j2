@@ -1,0 +1,3 @@
+-a always,exit -S all -F path=/usr/bin/chcon -F perm=x -F auid>={{ temp_vars.uid_min }} -F auid!=-1 -F key=perm_chng
+-a always,exit -S all -F path=/usr/bin/setfacl -F perm=x -F auid>={{ temp_vars.uid_min }} -F auid!=-1 -F key=perm_chng
+-a always,exit -S all -F path=/usr/bin/chacl -F perm=x -F auid>={{ temp_vars.uid_min }} -F auid!=-1 -F key=priv_cmd
