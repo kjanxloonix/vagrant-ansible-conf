@@ -1,0 +1,231 @@
+---
+- name: 4.1.1 | Ensure auditing is enabled
+  tags:
+    - rule_4.1.1
+  block:
+  - name: 4.1.1.1 | Ensure auditd is installed
+    tags:
+      - lvl2-server
+      - lvl2-workstation
+      - rule_4.1.1.1
+    ansible.builtin.package:
+      name:
+        - auditd
+        - audispd-plugins
+      state: present
+  - name: 4.1.1.2 | Ensure auditd service is enabled and active
+    tags:
+      - lvl2-server
+      - lvl2-workstation
+      - rule_4.1.1.2
+    ansible.builtin.systemd_service:
+      name: auditd
+      enabled: true
+      state: "started"
+  - name: 4.1.1.3 & 4.1.1.4 | REMEDIATION | Setting audit parameters in grub from template
+    tags:
+      - lvl2-server
+      - lvl2-workstation
+      - rule_4.1.1.3
+      - rule_4.1.1.4
+    block:
+      - name: 4.1.1.3 & 4.1.1.4 | REMEDIATION | Setting audit parameters in grub from template
+        ansible.builtin.template:
+          src: grub.j2
+          dest: /etc/default/grub
+      - name: 4.1.1.3 & 4.1.1.4 | REMEDIATION | Update GRUB configuration
+        ansible.builtin.shell:
+          cmd: update-grub
+
+- name: 4.1.2 | Configure Data Retention
+  tags:
+    - rule_4.1.2
+  block:
+  - name: 4.1.2.1 | Ensure audit log storage size is configured
+    tags:
+      - lvl2-server
+      - lvl2-workstation
+      - rule_4.1.2.1
+    ansible.builtin.lineinfile:
+      path: /etc/audit/auditd.conf
+      regexp: "^#\\s*max_log_file\\s*=|^max_log_file\\s*="
+      line: "max_log_file = {{ auditd_vars.max_log_file }}"
+  - name: 4.1.2.2 | Ensure audit logs are not automatically deleted
+    tags:
+      - lvl2-server
+      - lvl2-workstation
+      - rule_4.1.2.2
+    ansible.builtin.lineinfile:
+      path: /etc/audit/auditd.conf
+      regexp: "^#\\s*max_log_file_action\\s*=|^max_log_file_action\\s*="
+      line: "max_log_file_action = {{ auditd_vars.max_log_file_action }}"
+  - name: 4.1.2.3 | MAIN | Ensure system is disabled when audit logs are full
+    tags:
+      - lvl2-server
+      - lvl2-workstation
+      - rule_4.1.2.3
+    block:
+    - name: 4.1.2.3 | REMEDIATION | Set space_left_action parameter
+      ansible.builtin.lineinfile:
+        path: /etc/audit/auditd.conf
+        regexp: "^#\\s*space_left_action\\s*=|^space_left_action\\s*="
+        line: "space_left_action = {{ auditd_vars.space_left_action }}"
+    - name: 4.1.2.3 | REMEDIATION | Set action_mail_acct parameter
+      ansible.builtin.lineinfile:
+        path: /etc/audit/auditd.conf
+        regexp: "^#\\s*action_mail_acct\\s*=|^action_mail_acct\\s*="
+        line: "action_mail_acct = {{ auditd_vars.action_mail_acct }}"
+    - name: 4.1.2.3 | REMEDIATION | Set admin_space_left_action parameter
+      ansible.builtin.lineinfile:
+        path: /etc/audit/auditd.conf
+        regexp: "^#\\s*admin_space_left_action\\s*=|^admin_space_left_action\\s*="
+        line: "admin_space_left_action = {{ auditd_vars.admin_space_left_action }}"
+
+- name: 4.1.3 | Configure auditd rules
+  tags:
+    - rule_4.1.3
+  block:
+    - name: 4.1.3.1 | REMEDIATION | Ensure changes to system administration scope (sudoers) is collected
+      tags:
+        - lvl2-server
+        - lvl2-workstation
+        - rule_4.1.3.1
+      ansible.builtin.template:
+        src: 50-scope.rules.j2
+        dest: /etc/audit/rules.d/50-scope.rules
+    - name: 4.1.3.2 | REMEDIATION | Ensure actions as another user are always logged
+      tags:
+        - lvl2-server
+        - lvl2-workstation
+        - rule_4.1.3.1
+      ansible.builtin.template:
+        src: 50-user_emulation.rules.j2
+        dest: /etc/audit/rules.d/50-user_emulation.rules
+    - name: 4.1.3.3 | REMEDIATION | Ensure events that modify the sudo log file are collected
+      tags:
+        - lvl2-server
+        - lvl2-workstation
+        - rule_4.1.3.3
+      ansible.builtin.template:
+        src: 50-sudo.rules.j2
+        dest: /etc/audit/rules.d/50-sudo.rules
+    - name: 4.1.3.4 | REMEDIATION | Ensure events that modify date and time information are collected 
+      tags:
+        - lvl2-server
+        - lvl2-workstation
+        - rule_4.1.3.4
+      ansible.builtin.template:
+        src: 50-time-change.rules.j2
+        dest: /etc/audit/rules.d/50-time-change.rules
+    - name: 4.1.3.5 | REMEDIATION | Ensure events that modify the system's network environment are collected 
+      tags:
+        - lvl2-server
+        - lvl2-workstation
+        - rule_4.1.3.5
+      ansible.builtin.template:
+        src: 50-system_local.rules.j2
+        dest: /etc/audit/rules.d/50-system_local.rules
+    # 4.1.3.6 omit
+    - name: 4.1.3.7 | REMEDIATION | Ensure unsuccessful file access attempts are collected
+      tags:
+        - lvl2-server
+        - lvl2-workstation
+        - rule_4.1.3.7
+      ansible.builtin.template:
+        src: 50-access.rules.j2
+        dest: /etc/audit/rules.d/50-access.rules
+    - name: 4.1.3.8 | REMEDIATION | Ensure events that modify user/group information are collected
+      tags:
+        - lvl2-server
+        - lvl2-workstation
+        - rule_4.1.3.8
+      ansible.builtin.template:
+        src: 50-identity.rules.j2
+        dest: /etc/audit/rules.d/50-identity.rules
+    - name: 4.1.3.9 | REMEDIATION | Ensure discretionary access control permission modification events are collected
+      tags:
+        - lvl2-server
+        - lvl2-workstation
+        - rule_4.1.3.9
+      ansible.builtin.template:
+        src: 50-perm_mod.rules.j2
+        dest: /etc/audit/rules.d/50-perm_mod.rules
+    - name: 4.1.3.10 | REMEDIATION | Ensure successful file system mounts are collected
+      tags:
+        - lvl2-server
+        - lvl2-workstation
+        - rule_4.1.3.10
+      ansible.builtin.template:
+        src: 50-mounts.rules.j2
+        dest: /etc/audit/rules.d/50-mounts.rules
+    - name: 4.1.3.11 | REMEDIATION | Ensure session initiation information is collected
+      tags:
+        - lvl2-server
+        - lvl2-workstation
+        - rule_4.1.3.11
+      ansible.builtin.template:
+        src: 50-session.rules.j2
+        dest: /etc/audit/rules.d/50-session.rules
+    - name: 4.1.3.12 | REMEDIATION | Ensure login and logout events are collected
+      tags:
+        - lvl2-server
+        - lvl2-workstation
+        - rule_4.1.3.12
+      ansible.builtin.template:
+        src: 50-login.rules.j2
+        dest: /etc/audit/rules.d/50-login.rules
+    - name: 4.1.3.13 | REMEDIATION | Ensure file deletion events by users are collected
+      tags:
+        - lvl2-server
+        - lvl2-workstation
+        - rule_4.1.3.13
+      ansible.builtin.template:
+        src: 50-delete.rules.j2
+        dest: /etc/audit/rules.d/50-delete.rules
+    - name: 4.1.3.14 | REMEDIATION | Ensure events that modify the system's Mandatory Access Controls are collected
+      tags:
+        - lvl2-server
+        - lvl2-workstation
+        - rule_4.1.3.14
+      ansible.builtin.template:
+        src: 50-MAC-policy.rules.j2
+        dest: /etc/audit/rules.d/50-MAC-policy.rules
+    - name: 4.1.3.15 & 4.1.3.16 & 4.1.3.17 | REMEDIATION | Ensure successful and unsuccessful attempts to use the chcon,setfacl,chacl commands are recorded
+      tags:
+        - lvl2-server
+        - lvl2-workstation
+        - rule_4.1.3.15
+        - rule_4.1.3.16
+        - rule_4.1.3.17
+      ansible.builtin.template:
+        src: 50-perm_chng.rules.j2
+        dest: /etc/audit/rules.d/50-perm_chng.rules
+    - name: 4.1.3.18 | REMEDIATION | Ensure successful and unsuccessful attempts to use the usermod command are recorded
+      tags:
+        - lvl2-server
+        - lvl2-workstation
+        - rule_4.1.3.18
+      ansible.builtin.template:
+        src: 50-usermod.rules.j2
+        dest: /etc/audit/rules.d/50-usermod.rules
+    - name: 4.1.3.19 | REMEDIATION | Ensure kernel module loading unloading and modification is collected
+      tags:
+        - lvl2-server
+        - lvl2-workstation
+        - rule_4.1.3.19
+      ansible.builtin.template:
+        src: 50-kernel_modules.rules.j2
+        dest: /etc/audit/rules.d/50-kernel_modules.rules
+    - name: 4.1.3.20 | REMEDIATION | Ensure the audit configuration is immutable
+      tags:
+        - lvl2-server
+        - lvl2-workstation
+        - rule_4.1.3.20
+      ansible.builtin.template:
+        src: 99-finalize.rules.j2
+        dest: /etc/audit/rules.d/99-finalize.rules
+    # 4.1.3.21 Manual, omit
+    - name: Reload auditd rules
+      command: augenrules --load
+
+# 4.1.4 Audited manually, omit
