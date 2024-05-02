@@ -1,0 +1,103 @@
+---
+- name: 5.5.1.1 | Ensure minimum days between password changes is configured
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.5.1.1
+  block:
+  - name: 5.5.1.1 | AUDIT | Find users with PASS_MIN_DAYS value
+    ansible.builtin.shell:
+      cmd: "awk -F : '(/^[^:]+:[^!*]/ && $4 < 1){print $1 \" \" $4}' /etc/shadow"
+    register: found_users_passmindays
+  - name: 5.5.1.1 | REMEDIATION | Change PASS_MIN_DAYS in login.defs
+    ansible.builtin.lineinfile:
+      path: /etc/login.defs
+      regexp: "^#\\s*PASS_MIN_DAYS.*|^PASS_MIN_DAYS.*"
+      line: "PASS_MIN_DAYS {{ accenv_vars.passmindays }}"
+  - name: 5.5.1.1 | REMEDIATION | Modify PASS_MIN_DAYS for all users with password
+    ansible.builtin.shell:
+      cmd: "chage --mindays {{ accenv_vars.passmindays }} {{ item }}"
+    loop: "{{ found_users_passmindays.stdout_lines | map('regex_replace', '^(\\w+).*', '\\1') | list }}"
+
+- name: 5.5.1.2 | Ensure password expiration is 365 days or less
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.5.1.2
+  block:
+  - name: 5.5.1.2 | AUDIT | Find users with PASS_MAX_DAYS value
+    ansible.builtin.shell:
+      cmd: "awk -F: '(/^[^:]+:[^!*]/ && ($5>365 || $5~/([0-1]|-1|\\s*)/)){print $1 \" \"$5}' /etc/shadow"
+    register: found_users_passmaxdays
+  - name: 5.5.1.2 | REMEDIATION | Change PASS_MAX_DAYS in login.defs
+    ansible.builtin.lineinfile:
+      path: /etc/login.defs
+      regexp: "^#\\s*PASS_MAX_DAYS.*|^PASS_MAX_DAYS.*"
+      line: "PASS_MAX_DAYS {{ accenv_vars.passmaxdays }}"
+  - name: 5.5.1.2 | REMEDIATION | Modify PASS_MAX_DAYS for all users with password
+    ansible.builtin.shell:
+      cmd: "chage --maxdays {{ accenv_vars.passmaxdays }} {{ item }}"
+    loop: "{{ found_users_passmaxdays.stdout_lines | map('regex_replace', '^(\\w+).*', '\\1') | list }}"
+
+- name: 5.5.1.4 | Ensure password expiration warning days is 7 or more
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.5.1.4
+  block:
+  - name: 5.5.1.4 | AUDIT | Find users with INACTIVE value
+    ansible.builtin.shell:
+      cmd: "awk -F: '(/^[^:]+:[^!*]/ && ($7~/(\\s*$|-1)/ || $7>30)){print $1 \" \" $7}' /etc/shadow"
+    register: found_users_inactive
+  - name: 5.5.1.4 | REMEDIATION | Change INACTIVE in login.defs
+    ansible.builtin.lineinfile:
+      path: /etc/login.defs
+      regexp: "^#\\s*INACTIVE=.*|^INACTIVE=.*"
+      line: "INACTIVE={{ accenv_vars.inactive }}"
+  - name: 5.5.1.4 | REMEDIATION | Modify PASS_WARN_AGE for all users with password
+    ansible.builtin.shell:
+      cmd: "chage --inactive {{ accenv_vars.inactive }} {{ item }}"
+    loop: "{{ found_users_inactive.stdout_lines | map('regex_replace', '^(\\w+).*', '\\1') | list }}"
+
+# 5.5.1.5 Manual, omit
+# 5.5.2 Accounts secured by default, omit
+
+- name: 5.5.3 | Ensure default group for the root account is GID 0
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.5.3
+  ansible.builtin.user:
+    name: root
+    group: 0
+
+- name: 5.5.4 | MAIN | Ensure default user umask is 027 or more restrictive
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.5.4
+  block:
+  - name: 5.5.4 | REMEDIATION | Setting default umask in login.defs
+    ansible.builtin.lineinfile:
+      path: /etc/login.defs
+      regexp: "^#\\s*UMASK\\s*|^UMASK\\s*"
+      line: "UMASK {{ pam_vars.login_defs_umask }}"
+  - name: 5.5.4 | REMEDIATION | Setting USERGROUPS_ENAB in login.defs
+    ansible.builtin.lineinfile:
+      path: /etc/login.defs
+      regexp: "^#\\s*USERGROUPS_ENAB\\s*|^USERGROUPS_ENAB\\s*"
+      line: "USERGROUPS_ENAB {{ pam_vars.login_defs_usergroup_enab }}"
+  - name: 5.5.4 | REMEDIATION | Setting common-session from template
+    ansible.builtin.template:
+      src: common-session.j2
+      dest: /etc/pam.d/common-session
+
+- name: 5.5.5 | MAIN | Ensure default user shell timeout is 900 seconds or less
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.5.5
+  ansible.builtin.lineinfile:
+    path: /etc/profile
+    regexp: "^#readonly\\s*TMOUT\\s*|^readonly\\s*TMOUT\\s*"
+    line: "readonly TMOUT=900 ; export TMOUT"

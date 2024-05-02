@@ -4,3 +4,12 @@
 
 - name: "5.2 | Configure SSH Server"
   include_tasks: 5.2.yml
+
+- name: "5.3 | Configure privilege escalation"
+  include_tasks: 5.3.yml
+
+- name: "5.4 | Configure PAM"
+  include_tasks: 5.4.yml
+
+- name: "5.5 | User Accounts and Environment"
+  include_tasks: 5.5.yml

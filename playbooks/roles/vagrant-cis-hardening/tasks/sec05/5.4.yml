@@ -1,0 +1,75 @@
+---
+- name: 5.4.1 | MAIN | Ensure password creation requirements are configured
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.4.1
+  block:
+    - name: 5.4.1 | REMEDIATION | Install pam_pwquality module
+      ansible.builtin.package:
+        name: libpam-pwquality
+        state: present
+    - name: 5.4.1 | REMEDIATION | Set required password length
+      ansible.builtin.lineinfile:
+        path: /etc/security/pwquality.conf
+        regexp: "^#\\s*minlen\\s*=|^minlen\\s*="
+        line: "minlen = {{ pam_vars.minlen }}"
+    - name: 5.4.1 | REMEDIATION | Set required password complexity
+      ansible.builtin.lineinfile:
+        path: /etc/security/pwquality.conf
+        regexp: "^#\\s*minclass\\s*=|^minclass\\s*="
+        line: "minclass = {{ pam_vars.minclass }}"
+
+- name: 5.4.2 | MAIN | Ensure lockout for failed password attempts is configured
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.4.2
+  block:
+    - name: 5.4.2 | REMEDIATION | Setting common-auth from template
+      ansible.builtin.template:
+        src: common-auth.j2
+        dest: /etc/pam.d/common-auth
+    - name: 5.4.2 | REMEDIATION | Adding configuration to common-account
+      ansible.builtin.lineinfile:
+        path: /etc/pam.d/common-account
+        line: "account required pam_faillock.so"
+        insertafter: EOF
+    - name: 5.4.2 | REMEDIATION | Fail lock deny configuration 
+      ansible.builtin.lineinfile:
+        path: /etc/security/faillock.conf
+        regexp: "^#\\s*deny\\s*=|^deny\\s*="
+        line: "deny = {{ pam_vars.deny }}"
+    - name: 5.4.2 | REMEDIATION | Fail lock fail_interval configuration
+      ansible.builtin.lineinfile:
+        path: /etc/security/faillock.conf
+        regexp: "^#\\s*fail_interval\\s*=|^fail_interval\\s*="
+        line: "fail_interval = {{ pam_vars.fail_interval }}"
+    - name: 5.4.2 | REMEDIATION | Fail lock unlock_time configuration
+      ansible.builtin.lineinfile:
+        path: /etc/security/faillock.conf
+        regexp: "^#\\s*unlock_time\\s*=|^unlock_time\\s*="
+        line: "unlock_time = {{ pam_vars.unlock_time }}"
+
+- name: 5.4.3 | MAIN | Ensure password reuse is limited
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.4.3
+  block:
+  - name: 5.4.3 | REMEDIATION | Setting common-password from template
+    ansible.builtin.template:
+      src: common-password.j2
+      dest: /etc/pam.d/common-password
+
+- name: 5.4.4 | MAIN | Ensure password hashing algorithm is up to date with the latest standards
+    - lvl1-server
+    - lvl1-workstation
+    - rule_5.4.4
+  block:
+  - name: 5.4.4 | REMEDIATION | Ensure that ENCRYPT_METHOD is set to yescrypt
+    ansible.builtin.lineinfile:
+      path: /etc/login.defs
+      regexp: "^#\\s*ENCRYPT_METHOD\\s*|^ENCRYPT_METHOD\\s*"
+      line: "ENCRYPT_METHOD {{ pam_vars.encrypt_method }}"
+
+# 5.4.5 - Manual, omit

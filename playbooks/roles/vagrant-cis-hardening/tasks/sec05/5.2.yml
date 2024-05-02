@@ -10,7 +10,6 @@
     owner: root
     group: root
 
-
 - name: 5.2.2 | MAIN | Ensure permissions on SSH private host key files are configured
   tags:
     - lvl1-server
@@ -32,7 +31,6 @@
       loop: "{{ ssh_private_keys.files }}"
       loop_control:
         label: "{{ item.path }}"
-
 
 - name: 5.2.3 | MAIN | Ensure permissions on SSH public host key files are configured
   tags:
