@@ -1,0 +1,5 @@
+---
+- name: Install Lynis
+  ansible.builtin.package:
+    name: lynis
+    state: present

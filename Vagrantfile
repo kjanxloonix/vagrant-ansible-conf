@@ -49,12 +49,6 @@ Vagrant.configure("2") do |config|
     dev.vm.provider "virtualbox" do |vb|
       vb.name = "Developer VM"
     end
-    # Install required dependencies
-    dev.vm.provision "shell", inline: <<-SHELL
-      sudo apt-get update
-      sudo apt-get install -y xfce4
-      sudo startx &
-    SHELL
     dev.vm.provision :reload
   end
 
