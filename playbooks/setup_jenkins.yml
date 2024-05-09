@@ -1,6 +1,6 @@
 ---
 - name: Install jenkins on Second App VM
-  hosts: jenkins.vagrant.local
+  hosts: jenkinsservers
   gather_facts: true
   become: true
   pre_tasks:
@@ -13,8 +13,5 @@
       package:
         name: openjdk-11-jdk
         state: present
-  tasks:
-    - name: Install Lynis
-      import_tasks: setup_lynis.yml
   roles:
     - jenkins

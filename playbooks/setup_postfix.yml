@@ -1,6 +1,6 @@
 ---
 - name: Install postfix on Mail server VM
-  hosts: mx.vagrant.local
+  hosts: mailservers
   gather_facts: true
   become: true
   pre_tasks:
@@ -9,8 +9,5 @@
         upgrade: yes
         update_cache: yes
         cache_valid_time: 86400
-  tasks:
-    - name: Install Lynis
-      import_tasks: setup_lynis.yml
   roles:
     - postfix

@@ -1,0 +1,11 @@
+---
+- name: Run all setup playbooks for every VM
+  hosts: all
+  gather_facts: true
+  become: true
+  tasks:
+    - import_playbook: setup_tomcat.yml
+    - import_playbook: setup_jenkins.yml
+    - import_playbook: setup_postgresql.yml
+    - import_playbook: setup_postfix.yml
+    - import_playbook: setup_dev.yml

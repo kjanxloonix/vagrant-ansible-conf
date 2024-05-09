@@ -1,6 +1,6 @@
 ---
 - name: Install XFCE4 on Developer VM
-  hosts: dev.vagrant.local
+  hosts: devservers
   gather_facts: true
   become: true
   pre_tasks:
@@ -8,10 +8,9 @@
       apt:
         upgrade: yes
         update_cache: yes
-        cache_valid_time: 86400  
+        cache_valid_time: 86400
   tasks:
     - name: Install XFCE4 package
       package:
-        - xfce4
-    - name: Install Lynis
-      import_tasks: setup_lynis.yml
+        name: xfce4
+        state: present
