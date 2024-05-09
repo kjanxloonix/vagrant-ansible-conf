@@ -1,5 +1,10 @@
 ---
-- name: Install Lynis
-  ansible.builtin.package:
-    name: lynis
-    state: present
+- name: Install Lynis on Developer VM
+  hosts: devservers
+  gather_facts: true
+  become: true
+  tasks:
+    - name: Install Lynis
+      package:
+        name: lynis
+        state: present
