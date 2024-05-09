@@ -49,7 +49,6 @@ Vagrant.configure("2") do |config|
     dev.vm.provider "virtualbox" do |vb|
       vb.name = "Developer VM"
     end
-    dev.vm.provision :reload
   end
 
   # Database VM

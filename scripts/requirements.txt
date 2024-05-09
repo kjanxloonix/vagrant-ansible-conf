@@ -1,2 +1,1 @@
-vagrant-reload
 vagrant-hostmanager
