@@ -10,3 +10,15 @@
 [submodule "roles/tomcat"]
 	path = roles/tomcat
 	url = https://github.com/robertdebock/ansible-role-tomcat.git
+[submodule "roles/robertdebock.bootstrap"]
+	path = roles/robertdebock.bootstrap
+	url = https://github.com/robertdebock/ansible-role-bootstrap
+[submodule "roles/robertdebock.core_dependencies"]
+	path = roles/robertdebock.core_dependencies
+	url = https://github.com/robertdebock/ansible-role-core_dependencies
+[submodule "roles/robertdebock.java"]
+	path = roles/robertdebock.java
+	url = https://github.com/robertdebock/ansible-role-java
+[submodule "roles/robertdebock.service"]
+	path = roles/robertdebock.service
+	url = https://github.com/robertdebock/ansible-role-service
