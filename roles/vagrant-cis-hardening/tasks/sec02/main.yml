@@ -1,0 +1,11 @@
+---
+- name: "2.1 | Configure Time Synchronization"
+  include_tasks: 2.1.yml
+
+- name: "2.2 | Special Purpose Services"
+  include_tasks: 2.2.yml
+
+- name: "2.3 | Service Clients"
+  include_tasks: 2.3.yml
+
+# 2.4 Manual, omit

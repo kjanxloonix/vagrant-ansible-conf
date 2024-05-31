@@ -1,0 +1,21 @@
+---
+- name: "1.1 | Filesystem Configuration"
+  include_tasks: 1.1.yml
+
+# 1.2 Manual, omit
+
+- name: "1.3 | Filesystem Integrity Checking"
+  include_tasks: 1.3.yml
+
+# 1.4 Secure Boot Settings, omit
+
+- name: "1.5 | Additional Process Hardening"
+  include_tasks: 1.5.yml
+
+- name: "1.6 | Mandatory Access Control"
+  include_tasks: 1.6.yml
+
+- name: "1.7 | Command Line Warning Banners"
+  include_tasks: 1.7.yml
+
+# 1.8 GNOME Display Manager, omit

@@ -1,0 +1,63 @@
+---
+- name: 3.5.1 | Configure Uncomplicated Firewall
+  tags: 
+    - rule_3.5.1
+  block:
+  - name: 3.5.1.1 | Ensure ufw is installed
+    tags:
+      - lvl1-server
+      - lvl1-workstation
+      - rule_3.5.1.1
+    ansible.builtin.package:
+      name: ufw
+      state: present
+  - name: 3.5.1.2 | Ensure iptables-persistent is not installed with ufw
+    tags:
+      - lvl1-server
+      - lvl1-workstation
+      - rule_3.5.1.2
+    ansible.builtin.package:
+      name: iptables-persistent
+      state: absent
+  - name: 3.5.1.3 | Ensure ufw service is enabled
+    tags:
+      - lvl1-server
+      - lvl1-workstation
+      - rule_3.5.1.3
+    block:
+    - name: 3.5.1.3 | REMEDIATION |Ensure ufw service is unmasked, enabled and started
+      ansible.builtin.systemd:
+        name: ufw.service
+        enabled: true
+        masked: no
+        state: started
+    - name: 3.5.1.3 | REMEDIATION | Ensure ufw is enabled and started
+      ansible.builtin.systemd:
+        name: ufw
+        enabled: true
+        state: started
+  - name: 3.5.1.4 | Ensure ufw loopback traffic is configured
+    tags:
+      - lvl1-server
+      - lvl1-workstation
+      - rule_3.5.1.4
+    ansible.builtin.shell: |
+      ufw allow in on lo
+      ufw allow out on lo
+      ufw deny in from 127.0.0.0/8
+      ufw deny in from ::1
+  # 3.5.1.5 Manual, omit
+  # 3.5.1.6 UFW rules already exist, omit
+  - name: 3.5.1.7 | Ensure ufw default deny firewall policy
+    tags:
+      - lvl1-server
+      - lvl1-workstation
+      - rule_3.5.1.7
+    ansible.builtin.shell: |
+      ufw default deny incoming
+      ufw default deny outgoing
+      ufw default deny routed
+      
+# 3.5.2 Configure nftables, omit
+
+# 3.5.3 Configure iptables, omit

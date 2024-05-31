@@ -1,0 +1,42 @@
+---
+# 3.1.1 Manual, omit
+
+- name: 3.1.2 | Ensure wireless interfaces are disabled
+  tags: 
+    - lvl1-server
+    - lvl2-workstation
+    - rule_3.1.2
+  ansible.builtin.script: 
+    cmd: scripts/disable_wireless_interfaces.sh
+
+- name: 3.1.3 | Ensure DCCP is disabled
+  tags: 
+    - lvl2-server
+    - lvl2-workstation
+    - rule_3.1.3
+  ansible.builtin.script:
+    cmd: scripts/disable_dccp.sh
+
+- name: 3.1.4 | Ensure SCTP is disabled
+  tags: 
+    - lvl2-server
+    - lvl2-workstation
+    - rule_3.1.4
+  ansible.builtin.script:
+    cmd: scripts/disable_sctp.sh
+
+- name: 3.1.5 | Ensure RDS is disabled
+  tags: 
+    - lvl2-server
+    - lvl2-workstation
+    - rule_3.1.5
+  ansible.builtin.script:
+    cmd: scripts/disable_rds.sh
+
+- name: 3.1.6 | Ensure TIPC is disabled
+  tags: 
+    - lvl2-server
+    - lvl2-workstation
+    - rule_3.1.6
+  ansible.builtin.script:
+    cmd: scripts/disable_tipc.sh

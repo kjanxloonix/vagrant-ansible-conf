@@ -1,0 +1,153 @@
+---
+# 2.2.1 X Windows System, omit
+- name: 2.2.2 | Ensure Avahi Server is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.2.2
+  ansible.builtin.package:
+    name: avahi-daemon
+    state: absent
+
+- name: 2.2.3 | Ensure CUPS is not installed
+  tags: 
+    - lvl1-server
+    - lvl2-workstation
+    - rule_2.2.3
+  ansible.builtin.package:
+    name: cups
+    state: absent
+
+- name: 2.2.4 | Ensure DHCP Server is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.2.4
+  ansible.builtin.package:
+    name: isc-dhcp-server
+    state: absent
+
+- name: 2.2.5 | Ensure LDAP Server is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.2.5
+  ansible.builtin.package:
+    name: slapd
+    state: absent
+
+- name: 2.2.6 | Ensure NFS is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.2.5
+  ansible.builtin.package:
+    name: nfs-kernel-server
+    state: absent
+
+- name: 2.2.7 | Ensure DNS Server is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.2.7
+  ansible.builtin.package:
+    name: bind9
+    state: absent
+
+- name: 2.2.8 | Ensure FTP Server is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.2.8
+  ansible.builtin.package:
+    name: vsftpd
+    state: absent
+
+- name: 2.2.9 | Ensure HTTP Server is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.2.9
+  ansible.builtin.package:
+    name: apache2
+    state: absent
+
+- name: 2.2.10 | Ensure IMAP and POP3 Server is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.2.10
+  ansible.builtin.package:
+    name: dovecot-imapd dovecot-pop3d
+    state: absent
+
+- name: 2.2.11 | Ensure Samba is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.2.11
+  ansible.builtin.package:
+    name: samba
+    state: absent
+
+- name: 2.2.12 | Ensure HTTP Proxy Server is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.2.12
+  ansible.builtin.package:
+    name: squid
+    state: absent
+
+- name: 2.2.13 | Ensure SNMP Server is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.2.13
+  ansible.builtin.package:
+    name: snmp
+    state: absent
+
+- name: 2.2.14 | Ensure NIS Server is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.2.14
+  ansible.builtin.package:
+    name: nis
+    state: absent
+
+- name: 2.2.15 | Ensure mail transfer agent is configured for local-only mode
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.2.15
+    - postfix
+  block:
+    - name: 2.2.15 | REMEDIATION | Ensure that "RECEIVING MAIL" section exists
+      ansible.builtin.lineinfile:
+        path: /etc/postfix/main.cf
+        line: '# RECEIVING MAIL'
+        insertafter: '^#.*$'
+        create: true
+        state: present
+    - name: 2.2.15 | REMEDIATION | Set "inet_interfaces = loopback-only" under "RECEIVING MAIL" section
+      ansible.builtin.lineinfile:
+        path: /etc/postfix/main.cf
+        regexp: '^inet_interfaces\s*='
+        line: 'inet_interfaces = loopback-only'
+        insertafter: '# RECEIVING MAIL'
+        state: present  
+    - name: 2.2.15 | REMEDIATION | Restart postfix
+      ansible.builtin.systemd:
+        name: postfix
+        state: restarted
+
+- name: 2.2.16 | Ensure rsync service is either not installed or masked
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.2.16
+  ansible.builtin.package:
+    name: rsync
+    state: absent

@@ -1,0 +1,69 @@
+---
+- name: 1.1.1 | Disable unused filesystems
+  tags: 
+    - rule_1.1.1
+  block:
+  - name: 1.1.1.1 | Ensure mounting of cramfs filesystems is disabled
+    tags:
+      - lvl1-server
+      - lvl1-workstation
+      - rule_1.1.1.1
+    ansible.builtin.script:
+      cmd: scripts/disable_cramfs.sh
+  - name: 1.1.1.2 | Ensure mounting of squashfs filesystems is disabled
+    tags:
+      - lvl2-server
+      - lvl2-workstation
+      - rule_1.1.1.2
+    ansible.builtin.script:
+      cmd: scripts/disable_squashfs.sh
+  - name: 1.1.1.3 | Ensure mounting of udf filesystems is disabled
+    tags:
+      - lvl2-server
+      - lvl2-workstation
+      - rule_1.1.1.3
+    ansible.builtin.script:
+      cmd: scripts/disable_udf.sh
+
+# - name: 1.1.2 | Configure /tmp
+#   tags: 
+#     - rule_1.1.2
+#   block:
+#   - name: 1.1.2.1 | Ensure /tmp is a seperate partition
+#     tags:
+#       - lvl1-server
+#       - lvl1-workstation
+#       - rule_1.1.2.1
+#     ansible.builtin.systemd:
+#       name: tmp.mount
+#       masked: no
+#       state: started
+
+# - name: 1.1.3 | Configure /var
+#   tags: 
+#     - rule_1.1.3
+#   block:
+#   - name: 1.1.3.1 | Ensure seperate partition exists for /var
+#     tags:
+#       - lvl2-server
+#       - lvl2-workstation
+#       - rule_1.1.3.1
+
+# 1.1.2 - 1.1.8 same approach
+
+- name: 1.1.9 | Disable Automounting
+  tags: 
+    - lvl1-server
+    - lvl2-workstation
+    - rule_1.1.9
+  ansible.builtin.package:
+    name: autofs
+    state: absent
+
+- name: 1.1.10 | Disable USB Storage
+  tags: 
+    - lvl1-server
+    - lvl2-workstation
+    - rule_1.1.10
+  ansible.builtin.script:
+    cmd: scripts/disable_usb-storage.sh

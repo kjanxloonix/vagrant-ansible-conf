@@ -1,4 +1,13 @@
 ---
+- name: 1 | Initial Setup
+  include_tasks: sec01/main.yml
+
+- name: 2 | Services
+  include_tasks: sec02/main.yml
+
+- name: 3 | Network Configuration
+  include_tasks: sec03/main.yml
+
 - name: 4 | Logging and Auditing
   include_tasks: sec04/main.yml
 

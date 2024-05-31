@@ -1,0 +1,88 @@
+---
+- name: 1.5.1 | Ensure address space layout randomization (ASLR) is enabled
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_1.5.1
+  block:
+    - name: 1.5.1 | REMEDIATION | Ensure that /etc/sysctl.d/60-kernel_sysctl.conf exists and set the active kernel parameter in file
+      ansible.builtin.lineinfile:
+        path: /etc/sysctl.d/60-kernel_sysctl.conf
+        line: 'kernel.randomize_va_space = 2'
+        create: true
+        state: present
+    - name: 1.5.1 | REMEDIATION | Set the active kernel parameter using command
+      ansible.builtin.shell:
+        cmd: sysctl -w kernel.randomize_va_space=2
+
+- name: 1.5.2 | Ensure prelink is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_1.5.2
+  block:
+    # - name: 1.5.2 | REMEDIATION | Restore binaries to normal
+    #   ansible.builtin.shell:
+    #     cmd: prelink -ua
+    - name: 1.5.2 | REMEDIATION | Uninstall prelink package
+      ansible.builtin.package:
+        name: prelink
+        state: absent
+
+- name: 1.5.3 | Ensure Automatic Error Reporting is not enabled
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_1.5.3
+  ansible.builtin.package:
+    name: apport
+    state: absent
+
+- name: 1.5.4 | Ensure core dumps are restricted
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_1.5.4
+  block:
+    - name: 1.5.4 | REMEDIATION | Ensure that /etc/security/limits.conf exists and set hard limit on core dumps
+      ansible.builtin.lineinfile:
+        path: /etc/security/limits.conf
+        line: '* hard core 0'
+        create: true
+        state: present
+    - name: 1.5.4 | REMEDIATION | Ensure that /etc/sysctl.conf exists and set the dumpable parameter
+      ansible.builtin.lineinfile:
+        path: /etc/sysctl.conf
+        line: 'fs.suid_dumpable = 0'
+        create: true
+        state: present
+    - name: 1.5.4 | REMEDIATION | Set the active kernel parameter using command
+      ansible.builtin.shell:
+        cmd: sysctl -w fs.suid_dumpable=0
+    - name: 1.5.4 | REMEDIATION | Check if systemd-coredump package is installed
+      ansible.builtin.shell:
+        cmd: dpkg-query -W -f='${Status}' systemd-coredump
+      register: coredump_check
+      failed_when: no
+    - name: 1.5.4 | REMEDIATION | Display error message if the condition was not met
+      debug:
+        msg: Package systemd-coredump does not exist
+      when: coredump_check.rc != 0
+    - name: 1.5.4 | REMEDIATION | Set Storage parameter in /etc/systemd/coredump.conf
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/coredump.conf
+        regexp: '^Storage='
+        line: 'Storage=none'
+        create: yes
+      when: coredump_check.rc == 0
+    - name: 1.5.4 | REMEDIATION | Set ProcessSizeMax parameter in /etc/systemd/coredump.conf
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/coredump.conf
+        regexp: '^ProcessSizeMax='
+        line: 'ProcessSizeMax=0'
+        create: yes
+      when: coredump_check.rc == 0
+    - name: 1.5.4 | REMEDIATION | Reload daemon
+      ansible.builtin.shell:
+        cmd: systemctl daemon-reload
+      when: coredump_check.rc == 0

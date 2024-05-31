@@ -1,0 +1,54 @@
+---
+- name: 2.3.1 | Ensure NIS Client is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.3.1
+  ansible.builtin.package:
+    name: nis
+    state: absent
+
+- name: 2.3.2 | Ensure rsh Client is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.3.2
+  ansible.builtin.package:
+    name: rsh-client
+    state: absent
+
+- name: 2.3.3 | Ensure talk Client is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.3.3
+  ansible.builtin.package:
+    name: talk
+    state: absent
+
+- name: 2.3.4 | Ensure telnet Client is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.3.4
+  ansible.builtin.package:
+    name: telnet
+    state: absent
+
+- name: 2.3.5 | Ensure LDAP Client is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.3.5
+  ansible.builtin.package:
+    name: ldap-utils
+    state: absent
+
+- name: 2.3.6 | Ensure RPC is not installed
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_2.3.6
+  ansible.builtin.package:
+    name: rpcbind
+    state: absent

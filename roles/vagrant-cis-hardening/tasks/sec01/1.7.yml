@@ -1,0 +1,78 @@
+---
+- name: 1.7.1 | Ensure message of the day is configured properly
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_1.7.1
+  block:
+  - name: 1.7.1 | REMEDIATION | Remove /etc/motd file
+    ansible.builtin.shell:
+      cmd: rm /etc/motd      
+    register: motd_check
+    failed_when: no
+  - name: 1.7.1 | REMEDIATION | Display error message if the condition was not met
+    debug:
+      msg: File /etc/motd does not exist
+    when: motd_check != 0
+
+- name: 1.7.2 | Ensure local login warning banner is configured properly
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_1.7.2
+  block:
+  - name: 1.7.2 | REMEDIATION | Copy the template to the destination file
+    ansible.builtin.template:
+      src: issue.j2
+      dest: /etc/issue
+    register: template_issue
+  - name: 1.7.2 | REMEDIATION | Remove unwanted instances \m, \r, \s, \v
+    ansible.builtin.replace:
+      path: /etc/issue
+      regexp: '\\[mrs\v]'
+      replace: ''
+    when: template_issue.changed
+
+- name: 1.7.3 | Ensure remote login warning banner is configured properly
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_1.7.3
+  block:
+  - name: 1.7.3 | REMEDIATION | Copy the template to the destination file
+    ansible.builtin.template:
+      src: issue.j2
+      dest: /etc/issue.net
+    register: template_issue_net
+  - name: 1.7.3 | REMEDIATION | Remove unwanted instances \m, \r, \s, \v
+    ansible.builtin.replace:
+      path: /etc/issue.net
+      regexp: '\\[mrs\v]'
+      replace: ''
+    when: template_issue_net.changed
+
+# 1.7.4 /etc/motd was removed in 1.7.1, omit
+
+- name: 1.7.5 | Ensure permissions on /etc/issue are configured
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_1.7.5
+  ansible.builtin.file:
+    path: /etc/issue
+    mode: 0644
+    owner: root
+    group: root
+    state: file
+
+- name: 1.7.6 | Ensure permissions on /etc/issue.net are configured
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_1.7.6
+  ansible.builtin.file:
+    path: /etc/issue
+    mode: 0644
+    owner: root
+    group: root
+    state: file

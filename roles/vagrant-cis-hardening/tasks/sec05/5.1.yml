@@ -94,7 +94,7 @@
       ansible.builtin.stat:
         path: /etc/cron.allow
       register: cron_allow_state
-    - name: 5.1.8 | REMEDIATION |Create cron.allow
+    - name: 5.1.8 | REMEDIATION | Create cron.allow
       ansible.builtin.file:
         path: /etc/cron.allow
         mode: 0640
