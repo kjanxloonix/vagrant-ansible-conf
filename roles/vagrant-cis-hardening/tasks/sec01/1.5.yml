@@ -73,16 +73,16 @@
         path: /etc/systemd/coredump.conf
         regexp: '^Storage='
         line: 'Storage=none'
-        create: yes
+        create: true
       when: coredump_check.rc == 0
     - name: 1.5.4 | REMEDIATION | Set ProcessSizeMax parameter in /etc/systemd/coredump.conf
       ansible.builtin.lineinfile:
         path: /etc/systemd/coredump.conf
         regexp: '^ProcessSizeMax='
         line: 'ProcessSizeMax=0'
-        create: yes
+        create: true
       when: coredump_check.rc == 0
     - name: 1.5.4 | REMEDIATION | Reload daemon
-      ansible.builtin.shell:
-        cmd: systemctl daemon-reload
+      ansible.builtin.systemd:
+        daemon_reload: true
       when: coredump_check.rc == 0

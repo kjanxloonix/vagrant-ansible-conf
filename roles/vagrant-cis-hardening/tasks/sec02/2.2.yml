@@ -131,6 +131,7 @@
         insertafter: '^#.*$'
         create: true
         state: present
+      when: ansible_hostname == 'postfix'
     - name: 2.2.15 | REMEDIATION | Set "inet_interfaces = loopback-only" under "RECEIVING MAIL" section
       ansible.builtin.lineinfile:
         path: /etc/postfix/main.cf
@@ -138,10 +139,12 @@
         line: 'inet_interfaces = loopback-only'
         insertafter: '# RECEIVING MAIL'
         state: present  
+      when: ansible_hostname == 'postfix'
     - name: 2.2.15 | REMEDIATION | Restart postfix
       ansible.builtin.systemd:
         name: postfix
         state: restarted
+      when: ansible_hostname == 'postfix'
 
 - name: 2.2.16 | Ensure rsync service is either not installed or masked
   tags: 

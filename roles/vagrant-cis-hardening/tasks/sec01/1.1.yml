@@ -25,31 +25,265 @@
     ansible.builtin.script:
       cmd: scripts/disable_udf.sh
 
-# - name: 1.1.2 | Configure /tmp
-#   tags: 
-#     - rule_1.1.2
-#   block:
-#   - name: 1.1.2.1 | Ensure /tmp is a seperate partition
-#     tags:
-#       - lvl1-server
-#       - lvl1-workstation
-#       - rule_1.1.2.1
-#     ansible.builtin.systemd:
-#       name: tmp.mount
-#       masked: no
-#       state: started
+- name: 1.1.2 | Configure /tmp
+  tags: 
+    - rule_1.1.2
+  block:
+  - name: 1.1.2.1 | Ensure /tmp is a seperate partition
+    tags:
+      - lvl1-server
+      - lvl1-workstation
+      - rule_1.1.2.1
+    block:
+    - name: 1.1.2.1 | REMEDIATION | Ensure that /tmp will be mounted at boot time
+      ansible.builtin.systemd:
+        name: tmp.mount
+        enabled: true
+        state: started
+        masked: no
+    - name: 1.1.2.1 | REMEDIATION | Modify /tmp mount in /etc/fstab
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: '^tmpfs\s+/tmp\s+tmpfs\s+'
+        line: 'tmpfs /tmp tmpfs defaults,rw,nosuid,nodev,noexec,relatime,size=2G 0 0'
+        backup: true
+  - name: 1.1.2.2 | Ensure nosuid, nodev and noexec option set on /tmp partition
+    tags:
+      - lvl1-server
+      - lvl1-workstation
+      - rule_1.1.2.2
+    block:
+    - name: 1.1.2.2 | REMEDIATION | Add nosuid, nodev and noexec option for the /tmp partition in /etc/fstab
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: '^.*\s+/tmp\s+.*$'
+        line: '<device> /tmp <fstype> defaults,rw,nosuid,nodev,noexec,relatime 0 0'
+        backrefs: true
+        backup: true
+    - name: 1.1.2.2 | REMEDIATION | Remount /tmp partition
+      ansible.builtin.shell: 
+        cmd: mount -o remount /tmp
+  # 1.1.2.3 noexec already set in 1.1.2.2, omit
+  # 1.1.2.4 nosuid already set in 1.1.2.2, omit
 
-# - name: 1.1.3 | Configure /var
-#   tags: 
-#     - rule_1.1.3
-#   block:
-#   - name: 1.1.3.1 | Ensure seperate partition exists for /var
-#     tags:
-#       - lvl2-server
-#       - lvl2-workstation
-#       - rule_1.1.3.1
+- name: 1.1.3 | Configure /var
+  tags: 
+    - rule_1.1.3
+  block:
+  # 1.1.3.1 Do not seperate partition for /var, omit
+  - name: 1.1.3.2 | Ensure nodev option set on /var partition
+    tags:
+      - lvl1-server
+      - lvl1-workstation
+      - rule_1.1.3.2
+    block:
+    - name: 1.1.3.2 | REMEDIATION | Check if /var partition exists
+      ansible.builtin.shell: 
+        cmd: lsblk -o MOUNTPOINT | grep '^/var$'
+      register: var_partition
+      failed_when: no
+    - name: 1.1.3.2 | REMEDIATION | Print message if /var partition exists
+      ansible.builtin.debug:
+        msg: "/var partition exists"
+      when: var_partition.rc == 0
+    - name: 1.1.3.2 | REMEDIATION | Print message if /var partition does not exist
+      ansible.builtin.debug:
+        msg: "/var partition does not exist"
+      when: var_partition.rc != 0
+    - name: 1.1.3.2 | REMEDIATION | Add nosuid and nodev option for the /var partition in /etc/fstab
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: '^.*\s+/var\s+.*$'
+        line: '<device> /var <fstype> defaults,rw,nosuid,nodev,relatime 0 0'
+        backrefs: true
+        backup: true
+    - name: 1.1.3.2 | REMEDIATION | Remount /var partition
+      ansible.builtin.shell: 
+        cmd: mount -o remount /var
+  # 1.1.3.3 nosuid already set in 1.1.3.2, omit
 
-# 1.1.2 - 1.1.8 same approach
+- name: 1.1.4 | Configure /var/tmp
+  tags: 
+    - rule_1.1.4
+  block:
+  # 1.1.4.1 Do not seperate partition for /var/tmp, omit
+  - name: 1.1.4.2 | Ensure noexec option set on /var/tmp partition
+    tags:
+      - lvl1-server
+      - lvl1-workstation
+      - rule_1.1.4.2
+    block:
+    - name: 1.1.4.2 | REMEDIATION | Check if /var/tmp partition exists
+      ansible.builtin.shell: 
+        cmd: lsblk -o MOUNTPOINT | grep '^/var/tmp$'
+      register: var_tmp_partition
+      failed_when: no
+    - name: 1.1.4.2 | REMEDIATION | Print message if /var/tmp partition exists
+      ansible.builtin.debug:
+        msg: "/var/tmp partition exists"
+      when: var_tmp_partition.rc == 0
+    - name: 1.1.4.2 | REMEDIATION | Print message if /var/tmp partition does not exist
+      ansible.builtin.debug:
+        msg: "/var/tmp partition does not exist"
+      when: var_tmp_partition.rc != 0
+    - name: 1.1.4.2 | REMEDIATION | Add nosuid, nodev and noexec option for the /var/tmp partition in /etc/fstab
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: '^.*\s+/var/tmp\s+.*$'
+        line: '<device> /var/tmp <fstype> defaults,rw,nosuid,nodev,noexec,relatime 0 0'
+        backrefs: true
+        backup: true
+    - name: 1.1.4.2 | REMEDIATION | Remount /var/tmp partition
+      ansible.builtin.shell: 
+        cmd: mount -o remount /var/tmp
+  # 1.1.4.3 nosuid already set in 1.1.4.2, omit
+  # 1.1.4.4 nodev already set in 1.1.4.2, omit
+
+- name: 1.1.5 | Configure /var/log
+  tags: 
+    - rule_1.1.5
+  block:
+  # 1.1.5.1 Do not seperate partition for /var/log, omit
+  - name: 1.1.6.2 | Ensure nodev option set on /var/log partition
+    tags:
+      - lvl1-server
+      - lvl1-workstation
+      - rule_1.1.5.2
+    block:
+    - name: 1.1.5.2 | REMEDIATION | Check if /var/log partition exists
+      ansible.builtin.shell: 
+        cmd: lsblk -o MOUNTPOINT | grep '^/var/log$'
+      register: var_log_partition
+      failed_when: no
+    - name: 1.1.5.2 | REMEDIATION | Print message if /var/log partition exists
+      ansible.builtin.debug:
+        msg: "/var/log partition exists"
+      when: var_log_partition.rc == 0
+    - name: 1.1.5.2 | REMEDIATION | Print message if /var/log partition does not exist
+      ansible.builtin.debug:
+        msg: "/var/log partition does not exist"
+      when: var_log_partition.rc != 0
+    - name: 1.1.5.2 | REMEDIATION | Add nosuid, nodev and noexec option for the /var/log partition in /etc/fstab
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: '^.*\s+/var/log\s+.*$'
+        line: '<device> /var/log <fstype> defaults,rw,nosuid,nodev,noexec,relatime 0 0'
+        backrefs: true
+        backup: true
+    - name: 1.1.5.2 | REMEDIATION | Remount /var/log partition
+      ansible.builtin.shell: 
+        cmd: mount -o remount /var/log
+  # 1.1.5.3 noexec already set in 1.1.5.2, omit
+  # 1.1.5.4 nosuid already set in 1.1.5.2, omit
+
+- name: 1.1.6 | Configure /var/log/audit
+  tags: 
+    - rule_1.1.6
+  block:
+  # 1.1.6.1 Do not seperate partition for /var/log/audit, omit
+  - name: 1.1.6.2 | Ensure noexec option set on /var/log/audit partition
+    tags:
+      - lvl1-server
+      - lvl1-workstation
+      - rule_1.1.6.2
+    block:
+    - name: 1.1.6.2 | REMEDIATION | Check if /var/log/audit partition exists
+      ansible.builtin.shell: 
+        cmd: lsblk -o MOUNTPOINT | grep '^/var/log/audit$'
+      register: var_log_audit_partition
+      failed_when: no
+    - name: 1.1.6.2 | REMEDIATION | Print message if /var/log/audit partition exists
+      ansible.builtin.debug:
+        msg: "/var/log/audit partition exists"
+      when: var_log_audit_partition.rc == 0
+    - name: 1.1.6.2 | REMEDIATION | Print message if /var/log/audit partition does not exist
+      ansible.builtin.debug:
+        msg: "/var/log/audit partition does not exist"
+      when: var_log_audit_partition.rc != 0
+    - name: 1.1.6.2 | REMEDIATION | Add nosuid, nodev and noexec option for the /var/log/audit partition in /etc/fstab
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: '^.*\s+/var/log/audit\s+.*$'
+        line: '<device> /var/log/audit <fstype> defaults,rw,nosuid,nodev,noexec,relatime 0 0'
+        backrefs: true
+        backup: true
+    - name: 1.1.6.2 | REMEDIATION | Remount /var/log/audit partition
+      ansible.builtin.shell: 
+        cmd: mount -o remount /var/log/audit
+  # 1.1.6.3 nodev already set in 1.1.6.2, omit
+  # 1.1.6.4 nosuid already set in 1.1.6.2, omit
+
+- name: 1.1.7 | Configure /home
+  tags: 
+    - rule_1.1.7
+  block:
+  # 1.1.7.1 Do not seperate partition for /home, omit
+  - name: 1.1.7.2 | Ensure nodev option set on /home partition
+    tags:
+      - lvl1-server
+      - lvl1-workstation
+      - rule_1.1.7.2
+    block:
+    - name: 1.1.7.2 | REMEDIATION | Check if /home partition exists
+      ansible.builtin.shell: 
+        cmd: lsblk -o MOUNTPOINT | grep '^/home$'
+      register: home_partition
+      failed_when: no
+    - name: 1.1.7.2 | REMEDIATION | Print message if /home partition exists
+      ansible.builtin.debug:
+        msg: "/home partition exists"
+      when: home_partition.rc == 0
+    - name: 1.1.7.2 | REMEDIATION | Print message if /home partition does not exist
+      ansible.builtin.debug:
+        msg: "/home partition does not exist"
+      when: home_partition.rc != 0
+    - name: 1.1.7.2 | REMEDIATION | Add nosuid and nodev option for the /home partition in /etc/fstab
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: '^.*\s+/home\s+.*$'
+        line: '<device> /home <fstype> defaults,rw,nosuid,nodev,relatime 0 0'
+        backrefs: true
+        backup: true
+    - name: 1.1.7.2 | REMEDIATION | Remount /home partition
+      ansible.builtin.shell: 
+        cmd: mount -o remount /home
+  # 1.1.7.3 nosuid already set in 1.1.7.2, omit
+
+- name: 1.1.8 | Configure /dev/shm
+  tags: 
+    - rule_1.1.8
+  block:
+  - name: 1.1.8.1 | Ensure nodev option set on /dev/shm partition
+    tags:
+      - lvl1-server
+      - lvl1-workstation
+      - rule_1.1.8.1
+    block:
+    - name: 1.1.8.1 | REMEDIATION | Check if /dev/shm partition exists
+      ansible.builtin.shell: 
+        cmd: lsblk -o MOUNTPOINT | grep '^/dev/shm$'
+      register: dev_shm_partition
+      failed_when: no
+    - name: 1.1.8.1 | REMEDIATION | Print message if /dev/shm partition exists
+      ansible.builtin.debug:
+        msg: "/dev/shm partition exists"
+      when: dev_shm_partition.rc == 0
+    - name: 1.1.8.1 | REMEDIATION | Print message if /dev/shm partition does not exist
+      ansible.builtin.debug:
+        msg: "/dev/shm partition does not exist"
+      when: dev_shm_partition.rc != 0
+    - name: 1.1.8.1 | REMEDIATION | Add nosuid, nodev and noexec option for the /dev/shm partition in /etc/fstab
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: '^.*\s+/dev/shm\s+.*$'
+        line: '<device> /dev/shm <fstype> defaults,rw,nosuid,nodev,noexec,relatime 0 0'
+        backrefs: true
+        backup: true
+    - name: 1.1.8.1 | REMEDIATION | Remount /dev/shm partition
+      ansible.builtin.shell: 
+        cmd: mount -o remount /dev/shm
+  # 1.1.8.2 noexec already set in 1.1.8.1, omit
+  # 1.1.8.3 nosuid already set in 1.1.8.1, omit
 
 - name: 1.1.9 | Disable Automounting
   tags: 
