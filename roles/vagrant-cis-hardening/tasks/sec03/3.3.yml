@@ -1,66 +1,72 @@
-# ---
-# - name: 3.3.1 | Ensure source routed packets are not accepted
-#   tags: 
-#     - lvl1-server
-#     - lvl1-workstation
-#     - rule_3.3.1
-#   ansible.builtin.script: 
-#     cmd: scripts/disable_source_route_packets.sh
+---
+- name: 3.3.1 | Ensure source routed packets are not accepted
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_3.3.1
+  ansible.builtin.script: 
+    cmd: scripts/disable_source_route_packets.sh
 
-# - name: 3.3.2 | Ensure ICMP redirects are not accepted
-#   tags: 
-#     - lvl1-server
-#     - lvl1-workstation
-#     - rule_3.3.2
-#   ansible.builtin.script: 
-#     cmd: scripts/disable_icmp_redirect.sh
+- name: 3.3.2 | Ensure ICMP redirects are not accepted
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_3.3.2
+  ansible.builtin.script: 
+    cmd: scripts/disable_icmp_redirect.sh
 
-# - name: 3.3.3 | Ensure secure ICMP redirects are not accepted
-#   tags: 
-#     - lvl1-server
-#     - lvl1-workstation
-#     - rule_3.3.3
-#   ansible.builtin.script: 
-#     cmd: scripts/disable_secure_icmp_redirect.sh
+- name: 3.3.3 | Ensure secure ICMP redirects are not accepted
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_3.3.3
+  ansible.builtin.script: 
+    cmd: scripts/disable_secure_icmp_redirect.sh
 
-# - name: 3.3.4 | Ensure suspicious packets are logged 
-#     - lvl1-server
-#     - lvl1-workstation
-#     - rule_3.3.4
-#   ansible.builtin.script: 
-#     cmd: scripts/log_suspicious_packets.sh
+- name: 3.3.4 | Ensure suspicious packets are logged 
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_3.3.4
+  ansible.builtin.script: 
+    cmd: scripts/log_suspicious_packets.sh
 
-# - name: 3.3.5 | Ensure broadcast ICMP requests are ignored 
-#     - lvl1-server
-#     - lvl1-workstation
-#     - rule_3.3.5
-#   ansible.builtin.script: 
-#     cmd: scripts/ignore_broadcast_icmp_requests.sh
+- name: 3.3.5 | Ensure broadcast ICMP requests are ignored 
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_3.3.5
+  ansible.builtin.script: 
+    cmd: scripts/ignore_broadcast_icmp_requests.sh
 
-# - name: 3.3.6 | Ensure bogus ICMP requests are ignored 
-#     - lvl1-server
-#     - lvl1-workstation
-#     - rule_3.3.6
-#   ansible.builtin.script: 
-#     cmd: scripts/ignore_broadcast_icmp_requests.sh
+- name: 3.3.6 | Ensure bogus ICMP requests are ignored 
+  tags:
+    - lvl1-server
+    - lvl1-workstation
+    - rule_3.3.6
+  ansible.builtin.script: 
+    cmd: scripts/ignore_bogus_icmp_requests.sh
 
-# - name: 3.3.7 | Ensure Reverse Path Filtering is enabled 
-#     - lvl1-server
-#     - lvl1-workstation
-#     - rule_3.3.7
-#   ansible.builtin.script: 
-#     cmd: scripts/enable_reverse_path_filtering.sh
+- name: 3.3.7 | Ensure Reverse Path Filtering is enabled
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_3.3.7
+  ansible.builtin.script: 
+    cmd: scripts/enable_reverse_path_filtering.sh
 
-# - name: 3.3.8 | Ensure TCP SYN Cookies is enabled 
-#     - lvl1-server
-#     - lvl1-workstation
-#     - rule_3.3.8
-#   ansible.builtin.script: 
-#     cmd: scripts/enable_tcp_syn_cookies.sh
+- name: 3.3.8 | Ensure TCP SYN Cookies is enabled
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_3.3.8
+  ansible.builtin.script: 
+    cmd: scripts/enable_tcp_syn_cookies.sh
 
-# - name: 3.3.9 | Ensure IPv6 router advertisements are not accepted 
-#     - lvl1-server
-#     - lvl1-workstation
-#     - rule_3.3.9
-#   ansible.builtin.script: 
-#     cmd: scripts/disable_ipv6_router_advertisements.sh
+- name: 3.3.9 | Ensure IPv6 router advertisements are not accepted
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_3.3.9
+  ansible.builtin.script: 
+    cmd: scripts/disable_ipv6_router_advertisements.sh

@@ -12,53 +12,39 @@ l_searchloc="/run/sysctl.d/*.conf /etc/sysctl.d/*.conf
 KPF()
 {
 # comment out incorrect parameter(s) in kernel parameter file(s)
-l_fafile="$(grep -s -- "^\s*$l_kpname" $l_searchloc | grep -Pv --
-"\h*=\h*$l_kpvalue\b\h*" | awk -F: '{print $1}')"
+l_fafile="$(grep -s -- "^\s*$l_kpname" $l_searchloc | grep -Pv -- "\h*=\h*$l_kpvalue\b\h*" | awk -F: '{print $1}')"
 for l_bkpf in $l_fafile; do
 echo -e "\n - Commenting out \"$l_kpname\" in \"$l_bkpf\""
 sed -ri "/$l_kpname/s/^/# /" "$l_bkpf"
 done
 # Set correct parameter in a kernel parameter file
-if ! grep -Pslq -- "^\h*$l_kpname\h*=\h*$l_kpvalue\b\h*(#.*)?$"
-$l_searchloc; then
-echo -e "\n - Setting \"$l_kpname\" to \"$l_kpvalue\" in
-\"$l_kpfile\""
+if ! grep -Pslq -- "^\h*$l_kpname\h*=\h*$l_kpvalue\b\h*(#.*)?$" $l_searchloc; then
+echo -e "\n - Setting \"$l_kpname\" to \"$l_kpvalue\" in \"$l_kpfile\""
 echo "$l_kpname = $l_kpvalue" >> "$l_kpfile"
 fi
 # Set correct parameter in active kernel parameters
 l_krp="$(sysctl "$l_kpname" | awk -F= '{print $2}' | xargs)"
 if [ "$l_krp" != "$l_kpvalue" ]; then
-echo -e "\n - Updating \"$l_kpname\" to \"$l_kpvalue\" in the active
-kernel parameters"
+echo -e "\n - Updating \"$l_kpname\" to \"$l_kpvalue\" in the active kernel parameters"
 sysctl -w "$l_kpname=$l_kpvalue"
-sysctl -w "$(awk -F'.' '{print $1"."$2".route.flush=1"}' <<<
-"$l_kpname")"
+sysctl -w "$(awk -F'.' '{print $1"."$2".route.flush=1"}' <<< "$l_kpname")"
 fi
 }
 IPV6F_CHK()
 {
 l_ipv6s=""
-grubfile=$(find /boot -type f \( -name 'grubenv' -o -name 'grub.conf' -
-o -name 'grub.cfg' \) -exec grep -Pl -- '^\h*(kernelopts=|linux|kernel)' {}
-\;)
+grubfile=$(find /boot -type f \( -name 'grubenv' -o -name 'grub.conf' -o -name 'grub.cfg' \) -exec grep -Pl -- '^\h*(kernelopts=|linux|kernel)' {} \;)
 if [ -s "$grubfile" ]; then
-! grep -P -- "^\h*(kernelopts=|linux|kernel)" "$grubfile" | grep -vq
--- ipv6.disable=1 && l_ipv6s="disabled"
+! grep -P -- "^\h*(kernelopts=|linux|kernel)" "$grubfile" | grep -vq -- ipv6.disable=1 && l_ipv6s="disabled"
 fi
-if grep -Pqs --
-"^\h*net\.ipv6\.conf\.all\.disable_ipv6\h*=\h*1\h*(#.*)?$" $l_searchloc && \
-grep -Pqs --
-"^\h*net\.ipv6\.conf\.default\.disable_ipv6\h*=\h*1\h*(#.*)?$" $l_searchloc && \
-sysctl net.ipv6.conf.all.disable_ipv6 | grep -Pqs --
-"^\h*net\.ipv6\.conf\.all\.disable_ipv6\h*=\h*1\h*(#.*)?$" && \
-sysctl net.ipv6.conf.default.disable_ipv6 | grep -Pqs --
-"^\h*net\.ipv6\.conf\.default\.disable_ipv6\h*=\h*1\h*(#.*)?$"; then
-Page 325
+if grep -Pqs -- "^\h*net\.ipv6\.conf\.all\.disable_ipv6\h*=\h*1\h*(#.*)?$" $l_searchloc && \
+grep -Pqs -- "^\h*net\.ipv6\.conf\.default\.disable_ipv6\h*=\h*1\h*(#.*)?$" $l_searchloc && \
+sysctl net.ipv6.conf.all.disable_ipv6 | grep -Pqs -- "^\h*net\.ipv6\.conf\.all\.disable_ipv6\h*=\h*1\h*(#.*)?$" && \
+sysctl net.ipv6.conf.default.disable_ipv6 | grep -Pqs -- "^\h*net\.ipv6\.conf\.default\.disable_ipv6\h*=\h*1\h*(#.*)?$"; then
 l_ipv6s="disabled"
 fi
 if [ -n "$l_ipv6s" ]; then
-echo -e "\n - IPv6 is disabled on the system, \"$l_kpname\" is not
-applicable"
+echo -e "\n - IPv6 is disabled on the system, \"$l_kpname\" is not applicable"
 else
 KPF
 fi

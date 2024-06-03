@@ -35,6 +35,38 @@
       - lvl1-workstation
       - rule_1.1.2.1
     block:
+    - name: 1.1.2.1 | REMEDIATION | Check if /etc/systemd/system/tmp.mount exist
+      ansible.builtin.stat:
+        path: /etc/systemd/system/tmp.mount
+      register: tmp_mount_file
+    - name: 1.1.2.1 | REMEDIATION | Print message if tmp.mount file exist
+      ansible.builtin.debug:
+        msg: "/etc/systemd/system/tmp.mount exist"
+      when: tmp_mount_file.stat.exists
+    - name: 1.1.2.1 | REMEDIATION | Print message if tmp.mount file does not exist
+      ansible.builtin.debug:
+        msg: "/etc/systemd/system/tmp.mount does not exist"
+      when: not tmp_mount_file.stat.exists
+    - name: 1.1.2.1 | REMEDIATION | Create or edit /etc/systemd/system/tmp.mount file
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/tmp.mount
+        content: |
+          [Unit]
+          Description=Temporary Directory /tmp
+          ConditionPathIsSymbolicLink=!/tmp
+          DefaultDependencies=no
+          Conflicts=umount.target
+          Before=local-fs.target umount.target
+          After=swap.target
+
+          [Mount]
+          What=tmpfs
+          Where=/tmp
+          Type=tmpfs
+        owner: root
+        group: root
+        mode: 0644
+      when: not tmp_mount_file.stat.exists
     - name: 1.1.2.1 | REMEDIATION | Ensure that /tmp will be mounted at boot time
       ansible.builtin.systemd:
         name: tmp.mount
@@ -77,14 +109,14 @@
       - lvl1-workstation
       - rule_1.1.3.2
     block:
-    - name: 1.1.3.2 | REMEDIATION | Check if /var partition exists
+    - name: 1.1.3.2 | REMEDIATION | Check if /var partition exist
       ansible.builtin.shell: 
         cmd: lsblk -o MOUNTPOINT | grep '^/var$'
       register: var_partition
       failed_when: no
-    - name: 1.1.3.2 | REMEDIATION | Print message if /var partition exists
+    - name: 1.1.3.2 | REMEDIATION | Print message if /var partition exist
       ansible.builtin.debug:
-        msg: "/var partition exists"
+        var: var_partition
       when: var_partition.rc == 0
     - name: 1.1.3.2 | REMEDIATION | Print message if /var partition does not exist
       ansible.builtin.debug:
@@ -97,9 +129,11 @@
         line: '<device> /var <fstype> defaults,rw,nosuid,nodev,relatime 0 0'
         backrefs: true
         backup: true
+      when: var_partition.rc == 0
     - name: 1.1.3.2 | REMEDIATION | Remount /var partition
       ansible.builtin.shell: 
         cmd: mount -o remount /var
+      when: var_partition.rc == 0
   # 1.1.3.3 nosuid already set in 1.1.3.2, omit
 
 - name: 1.1.4 | Configure /var/tmp
@@ -113,14 +147,14 @@
       - lvl1-workstation
       - rule_1.1.4.2
     block:
-    - name: 1.1.4.2 | REMEDIATION | Check if /var/tmp partition exists
+    - name: 1.1.4.2 | REMEDIATION | Check if /var/tmp partition exist
       ansible.builtin.shell: 
         cmd: lsblk -o MOUNTPOINT | grep '^/var/tmp$'
       register: var_tmp_partition
       failed_when: no
-    - name: 1.1.4.2 | REMEDIATION | Print message if /var/tmp partition exists
+    - name: 1.1.4.2 | REMEDIATION | Print message if /var/tmp partition exist
       ansible.builtin.debug:
-        msg: "/var/tmp partition exists"
+        msg: "/var/tmp partition exist"
       when: var_tmp_partition.rc == 0
     - name: 1.1.4.2 | REMEDIATION | Print message if /var/tmp partition does not exist
       ansible.builtin.debug:
@@ -133,9 +167,11 @@
         line: '<device> /var/tmp <fstype> defaults,rw,nosuid,nodev,noexec,relatime 0 0'
         backrefs: true
         backup: true
+      when: var_tmp_partition.rc == 0
     - name: 1.1.4.2 | REMEDIATION | Remount /var/tmp partition
       ansible.builtin.shell: 
         cmd: mount -o remount /var/tmp
+      when: var_tmp_partition.rc == 0
   # 1.1.4.3 nosuid already set in 1.1.4.2, omit
   # 1.1.4.4 nodev already set in 1.1.4.2, omit
 
@@ -150,14 +186,14 @@
       - lvl1-workstation
       - rule_1.1.5.2
     block:
-    - name: 1.1.5.2 | REMEDIATION | Check if /var/log partition exists
+    - name: 1.1.5.2 | REMEDIATION | Check if /var/log partition exist
       ansible.builtin.shell: 
         cmd: lsblk -o MOUNTPOINT | grep '^/var/log$'
       register: var_log_partition
       failed_when: no
-    - name: 1.1.5.2 | REMEDIATION | Print message if /var/log partition exists
+    - name: 1.1.5.2 | REMEDIATION | Print message if /var/log partition exist
       ansible.builtin.debug:
-        msg: "/var/log partition exists"
+        msg: "/var/log partition exist"
       when: var_log_partition.rc == 0
     - name: 1.1.5.2 | REMEDIATION | Print message if /var/log partition does not exist
       ansible.builtin.debug:
@@ -170,9 +206,11 @@
         line: '<device> /var/log <fstype> defaults,rw,nosuid,nodev,noexec,relatime 0 0'
         backrefs: true
         backup: true
+      when: var_log_partition.rc == 0
     - name: 1.1.5.2 | REMEDIATION | Remount /var/log partition
       ansible.builtin.shell: 
         cmd: mount -o remount /var/log
+      when: var_log_partition.rc == 0
   # 1.1.5.3 noexec already set in 1.1.5.2, omit
   # 1.1.5.4 nosuid already set in 1.1.5.2, omit
 
@@ -187,14 +225,14 @@
       - lvl1-workstation
       - rule_1.1.6.2
     block:
-    - name: 1.1.6.2 | REMEDIATION | Check if /var/log/audit partition exists
+    - name: 1.1.6.2 | REMEDIATION | Check if /var/log/audit partition exist
       ansible.builtin.shell: 
         cmd: lsblk -o MOUNTPOINT | grep '^/var/log/audit$'
       register: var_log_audit_partition
       failed_when: no
-    - name: 1.1.6.2 | REMEDIATION | Print message if /var/log/audit partition exists
+    - name: 1.1.6.2 | REMEDIATION | Print message if /var/log/audit partition exist
       ansible.builtin.debug:
-        msg: "/var/log/audit partition exists"
+        msg: "/var/log/audit partition exist"
       when: var_log_audit_partition.rc == 0
     - name: 1.1.6.2 | REMEDIATION | Print message if /var/log/audit partition does not exist
       ansible.builtin.debug:
@@ -207,9 +245,11 @@
         line: '<device> /var/log/audit <fstype> defaults,rw,nosuid,nodev,noexec,relatime 0 0'
         backrefs: true
         backup: true
+      when: var_log_audit_partition.rc == 0
     - name: 1.1.6.2 | REMEDIATION | Remount /var/log/audit partition
       ansible.builtin.shell: 
         cmd: mount -o remount /var/log/audit
+      when: var_log_audit_partition.rc == 0
   # 1.1.6.3 nodev already set in 1.1.6.2, omit
   # 1.1.6.4 nosuid already set in 1.1.6.2, omit
 
@@ -224,14 +264,14 @@
       - lvl1-workstation
       - rule_1.1.7.2
     block:
-    - name: 1.1.7.2 | REMEDIATION | Check if /home partition exists
+    - name: 1.1.7.2 | REMEDIATION | Check if /home partition exist
       ansible.builtin.shell: 
         cmd: lsblk -o MOUNTPOINT | grep '^/home$'
       register: home_partition
       failed_when: no
-    - name: 1.1.7.2 | REMEDIATION | Print message if /home partition exists
+    - name: 1.1.7.2 | REMEDIATION | Print message if /home partition exist
       ansible.builtin.debug:
-        msg: "/home partition exists"
+        msg: "/home partition exist"
       when: home_partition.rc == 0
     - name: 1.1.7.2 | REMEDIATION | Print message if /home partition does not exist
       ansible.builtin.debug:
@@ -244,9 +284,11 @@
         line: '<device> /home <fstype> defaults,rw,nosuid,nodev,relatime 0 0'
         backrefs: true
         backup: true
+      when: home_partition.rc == 0
     - name: 1.1.7.2 | REMEDIATION | Remount /home partition
       ansible.builtin.shell: 
         cmd: mount -o remount /home
+      when: home_partition.rc == 0
   # 1.1.7.3 nosuid already set in 1.1.7.2, omit
 
 - name: 1.1.8 | Configure /dev/shm
@@ -259,14 +301,14 @@
       - lvl1-workstation
       - rule_1.1.8.1
     block:
-    - name: 1.1.8.1 | REMEDIATION | Check if /dev/shm partition exists
+    - name: 1.1.8.1 | REMEDIATION | Check if /dev/shm partition exist
       ansible.builtin.shell: 
         cmd: lsblk -o MOUNTPOINT | grep '^/dev/shm$'
       register: dev_shm_partition
       failed_when: no
-    - name: 1.1.8.1 | REMEDIATION | Print message if /dev/shm partition exists
+    - name: 1.1.8.1 | REMEDIATION | Print message if /dev/shm partition exist
       ansible.builtin.debug:
-        msg: "/dev/shm partition exists"
+        msg: "/dev/shm partition exist"
       when: dev_shm_partition.rc == 0
     - name: 1.1.8.1 | REMEDIATION | Print message if /dev/shm partition does not exist
       ansible.builtin.debug:
@@ -279,9 +321,11 @@
         line: '<device> /dev/shm <fstype> defaults,rw,nosuid,nodev,noexec,relatime 0 0'
         backrefs: true
         backup: true
+      when: dev_shm_partition.rc == 0
     - name: 1.1.8.1 | REMEDIATION | Remount /dev/shm partition
       ansible.builtin.shell: 
         cmd: mount -o remount /dev/shm
+      when: dev_shm_partition.rc == 0
   # 1.1.8.2 noexec already set in 1.1.8.1, omit
   # 1.1.8.3 nosuid already set in 1.1.8.1, omit
 

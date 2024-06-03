@@ -1,16 +1,16 @@
 ---
-# - name: 3.2.1 | Ensure packet redirect sending is disabled
-#   tags: 
-#     - lvl1-server
-#     - lvl1-workstation
-#     - rule_3.2.1
-#   ansible.builtin.script: 
-#     cmd: scripts/disable_packet_redirect.sh
+- name: 3.2.1 | Ensure packet redirect sending is disabled
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_3.2.1
+  ansible.builtin.script: 
+    cmd: scripts/disable_packet_redirect.sh
 
-# - name: 3.2.2 | Ensure IP forwarding is disabled
-#   tags: 
-#     - lvl1-server
-#     - lvl1-workstation
-#     - rule_3.2.2
-#   ansible.builtin.script: 
-#     cmd: scripts/disable_ip_forwarding.sh
+- name: 3.2.2 | Ensure IP forwarding is disabled
+  tags: 
+    - lvl1-server
+    - lvl1-workstation
+    - rule_3.2.2
+  ansible.builtin.script: 
+    cmd: scripts/disable_ip_forwarding.sh
