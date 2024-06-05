@@ -1,6 +1,6 @@
 ---
 - name: Hardening using CIS benchmark
-  hosts: devservers
+  hosts: all
   gather_facts: true
   become: true
   roles:
